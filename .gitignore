@@ -1,0 +1,106 @@
+# ==========================================
+# Python & Bytecode
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+docs/
+# ==========================================
+# Virtual Environments (uv & venv)
+# ==========================================
+# Default virtualenv directory created by `uv venv` or `uv sync`
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# ==========================================
+# uv Specific Cache & Lock Override
+# ==========================================
+# Cache directory if placed inside project
+.uv/
+.cache/
+
+# NOTE: Keep `uv.lock` in git! 
+# Do NOT ignore `uv.lock` if you want reproducible builds across teams/servers.
+
+# ==========================================
+# Django & DRF Specific
+# ==========================================
+# Local SQLite database (for dev)
+*.sqlite3
+*.sqlite3-journal
+
+# Collected static files & user uploads
+/staticfiles/
+/static_root/
+/media/
+
+# Local configuration / secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Django logs
+*.log
+local_settings.py
+
+# ==========================================
+# Testing & Coverage
+# ==========================================
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# ==========================================
+# Editors & IDEs
+# ==========================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm / JetBrains
+.idea/
+
+# Mac / Windows system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
