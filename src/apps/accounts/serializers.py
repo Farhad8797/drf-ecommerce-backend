@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, password_validation
 
 User = get_user_model()
 
@@ -51,14 +51,23 @@ class ChangePasswordSerializer(serializers.Serializer):
         user: User = self.context['request'].user
         if not user.check_password(data):
             raise serializers.ValidationError('Old password is incorrect')
-        return user
+        return data
+    
+    def validate_new_password(self, data):
+        password_validation.validate_password(data, user=self.context['request'].user)
+        return data
+    
+    def validate(self, attrs: dict) -> dict:
+        if attrs.get('old_password') == attrs.get('new_password'):
+            raise serializers.ValidationError('passwords must be distinct')
+        return attrs
     
 
 class UpdateAccountInfoSerializer(serializers.ModelSerializer):
     image = serializers.URLField(write_only=True, allow_null=True, allow_blank=True, required=False)
     class Meta:
         model = User
-        fields = ['username', 'image', 'type', 'status']
+        fields = ['username', 'image', 'type']
 
     def validate(self, attrs : dict):
         image = attrs.get('image')
