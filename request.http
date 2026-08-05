@@ -1,0 +1,38 @@
+## variables
+@base_url = http://127.0.0.1:8000/
+@refresh_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc4NTk5NTkwMiwiaWF0IjoxNzg1OTA5NTAyLCJqdGkiOiJhZTJmZDUyMTBjMGM0ZDYwOTViYzNiYThjZmE2MDMzNiIsInVzZXJfaWQiOiIxIn0.dAktDoH7bi5b0WDJvKxc8FHZPbc2MRnwdua4nrKGvsw
+
+### register user
+POST {{base_url}}/api/auth/sign-up/
+Content-Type: application/json
+
+{
+    "email": "dev@example.com",
+    "password": "Password123!",
+    "username": "Dummy"
+}
+
+### sign-in
+POST {{base_url}}/api/auth/sign-in/
+Content-Type: application/json
+
+{
+    "email": "dev@example.com",
+    "password": "Password123!"
+}
+
+### see account info
+
+GET {{base_url}}/api/auth/u/
+Authorization: Bearer ''
+
+###
+PUT {{base_url}}/api/auth/u/update-info/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzg1OTEyMDQ2LCJpYXQiOjE3ODU5MTE3NDcsImp0aSI6IjM5NDRjZDk0MWU5NDQwNTM5M2Q0MjQ1M2NmZDk4YmQxIiwidXNlcl9pZCI6IjEifQ.W0fABUDyYqkhyol24fOcyX_BvRejFTdBU0RCtVhT_wg
+Content-Type: application/json
+
+{
+    "username": "md farhad hossain",
+    "type": "customer",
+    "status": "verified"
+}
