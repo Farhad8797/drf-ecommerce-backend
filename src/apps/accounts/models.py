@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password = None, **other_fields):
         if (not email) or (not username):
-            raise ValidationError('User must have username, email and password')
+            raise ValidationError('User must have username, email')
         
         user = self.model(
             username=username,
