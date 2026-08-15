@@ -83,11 +83,11 @@ class CreateOrderSerializer(serializers.Serializer):
         try:
             cart = Cart.objects.prefetch_related('items__product_variant__product__seller').get(creator = user)
         except Cart.DoesNotExist:
-            return serializers.ValidationError('User does not have any active Cart')
+            raise serializers.ValidationError('User does not have any active Cart')
         
         cart_items = cart.items.all()
         if not cart_items.exists():
-            return serializers.ValidationError('Cart is empty')
+            raise serializers.ValidationError('Cart is empty')
         
         attrs['cart_items'] = cart_items
         return attrs

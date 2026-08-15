@@ -13,6 +13,7 @@ dependencies = [
     "imagekitio>=5.8.0",
     "psycopg[binary]>=3.3.4",
     "python-dotenv>=1.2.2",
+    "stripe>=15.5.0",
     "supabase>=2.31.0",
 ]
 

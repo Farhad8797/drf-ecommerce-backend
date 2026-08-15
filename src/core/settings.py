@@ -166,6 +166,13 @@ SIMPLE_JWT = {
     "REVOKE_TOKEN_CLAIM": "hash_password",
    
 }
+
+# Stripe sandbox setup 
+
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_SANDBOX_TEST_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SANDBOX_TEST_PRIVATE_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
