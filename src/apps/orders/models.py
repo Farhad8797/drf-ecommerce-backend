@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 import uuid
+from decimal import Decimal
+from django.db.models import Sum, F
 
 class Order(models.Model):
     class PaymentMethod(models.TextChoices):
@@ -30,13 +32,24 @@ class Order(models.Model):
     payment_status = models.CharField(choices=PaymentStatus.choices, default=PaymentStatus.PENDING, max_length=20)
     delivery_status = models.CharField(choices=DeliveryStatus.choices, default=DeliveryStatus.PENDING, max_length=20)
 
+    def calculate_total_price(self):
+        total = self.order_items.aggregate(
+            total = Sum(F('price') * F('quantity'))
+        )['total']
+        self.total_price = total or Decimal('0.00')
+        self.save(update_fields=['total_price']) 
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_items')
     product_variant = models.ForeignKey('products.ProductVariant', on_delete=models.PROTECT, related_name='order_items_variants')
     price = models.DecimalField(max_digits=8, decimal_places=2)
     quantity = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(100, 'Cannot order more than 100 same items in 1 order'), MinValueValidator(1, 'At least 1 item is required')])
-
+    
+    @property
+    def items_total(self) -> Decimal:
+        return self.quantity * self.price
+    
 
 class Cart(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -48,3 +61,9 @@ class CartItem(models.Model):
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE, related_name='items')
     product_variant = models.ForeignKey('products.ProductVariant', on_delete=models.PROTECT, related_name='cart_items_variants')
     quantity = models.PositiveIntegerField(default=1, validators=[MaxValueValidator(100, 'Cannot order more than 100 same items in 1 order'), MinValueValidator(1, 'At least 1 item is required')])
+
+    @property
+    def items_total(self) -> Decimal:
+        if self.product_variant and hasattr(self.product_variant, 'price'):
+            return self.product_variant.price * self.quantity
+        return Decimal('0.00')
