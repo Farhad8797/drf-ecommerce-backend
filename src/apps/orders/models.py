@@ -31,6 +31,7 @@ class Order(models.Model):
     payment_method = models.CharField(choices=PaymentMethod.choices, default=PaymentMethod.CARD, max_length=20)
     payment_status = models.CharField(choices=PaymentStatus.choices, default=PaymentStatus.PENDING, max_length=20)
     delivery_status = models.CharField(choices=DeliveryStatus.choices, default=DeliveryStatus.PENDING, max_length=20)
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
 
     def calculate_total_price(self):
         total = self.order_items.aggregate(

@@ -33,6 +33,7 @@ class User(AbstractBaseUser):
     type = models.CharField(choices=UserType.choices, default=UserType.CUSTOMER)
     status = models.CharField(choices=UserStatus.choices, default=UserStatus.UNVERIFIED)
     is_active = models.BooleanField(default=True)
+    image_id = models.CharField(blank=True, null=True)
 
     objects=UserManager()
 

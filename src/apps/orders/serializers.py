@@ -81,7 +81,7 @@ class CreateOrderSerializer(serializers.Serializer):
         user = self.context['request'].user
 
         try:
-            cart = Cart.objects.prefetch_related('items__product_variant__product__seller').get(creator = user)
+            cart = Cart.objects.prefetch_related('items__product_variant__product__seller').filter(creator = user).order_by('-created_at').first()
         except Cart.DoesNotExist:
             raise serializers.ValidationError('User does not have any active Cart')
         
@@ -94,8 +94,8 @@ class CreateOrderSerializer(serializers.Serializer):
     
     def create(self, validated_data):
         user = self.context['request'].user
-        payment_method = self.validated_data['payment_method']
-        cart_items = self.validated_data['cart_items']
+        payment_method = validated_data['payment_method']
+        cart_items = validated_data['cart_items']
 
         items_by_seller = defaultdict(list)
 
@@ -123,13 +123,14 @@ class CreateOrderSerializer(serializers.Serializer):
                         order = order,
                         product_variant = item.product_variant,
                         price = item.product_variant.price,
-                        quantity = item.product_variant.quantity
+                        quantity = item.quantity
                     ) for item in items
                 ]
 
                 OrderItem.objects.bulk_create(order_items_to_be_created)
                 created_orders.append(order)
 
-            cart_items.delete()
+            if payment_method == Order.PaymentMethod.CASH_ON_DELIVERY:
+                cart_items.delete()
 
         return created_orders

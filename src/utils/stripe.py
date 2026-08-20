@@ -30,6 +30,7 @@ def verify_webhook_signature(payload: bytes, sig_header: str) -> stripe.Event:
             sig_header=sig_header,
             secret=settings.STRIPE_WEBHOOK_SECRET
         )
+        return event
     except ValueError as e:
         logger.error("Invalid Stripe webhook payload received.")
         raise e

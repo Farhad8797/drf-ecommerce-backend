@@ -21,7 +21,6 @@ class SignUpView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
 
-
 class SignInView(TokenObtainPairView):
     permission_classes = [permissions.AllowAny]
 
@@ -29,7 +28,6 @@ class SignInView(TokenObtainPairView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         tokens: dict = serializer.validated_data
-
         access_token = tokens.get('access')
         refresh_token = tokens.get('refresh')
 
@@ -55,7 +53,6 @@ class SignInView(TokenObtainPairView):
 
         return response
 
-
 class SignOutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -74,8 +71,6 @@ class SignOutView(APIView):
         response.delete_cookie('refresh_token')
         return response
 
-
-
 class AccountInfoView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
@@ -83,14 +78,12 @@ class AccountInfoView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
     
-
 class UpdateAccountInfoView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UpdateAccountInfoSerializer
 
     def get_object(self):
         return self.request.user
-
 
 class ChangePasswordView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -106,7 +99,6 @@ class ChangePasswordView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class NewAccessTokenView(TokenRefreshView):
     permission_classes = [permissions.AllowAny]
 
@@ -119,12 +111,11 @@ class NewAccessTokenView(TokenRefreshView):
         response.set_cookie(key='access_token', value=access_token, max_age=int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()), httponly=True, secure=False)
         return response 
 
-
 class DeleteAccountView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def destroy(self, request: Request, *args, **kwargs):
-        user: User = self.request.user
+        user: User = request.user
         user.is_active = False
         user.delete()
         response =  Response(
