@@ -94,9 +94,10 @@ class UpdateAccountInfoSerializer(serializers.ModelSerializer):
         fields = ['username', 'image', 'type']
 
     def validate(self, attrs : dict) -> dict:
-        image = attrs.get('image', None)
-
-        if(attrs.get('type') == User.UserType.MERCHANT and not image):
+        user_type = attrs.get('type', getattr(self.instance, 'type', None))
+        new_image = attrs.get('image', None)
+        existing_image = getattr(self.instance, 'image', None)
+        if(user_type == User.UserType.MERCHANT and not (new_image or existing_image)):
             raise serializers.ValidationError('Merchant must have an image')
         return attrs
     
