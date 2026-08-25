@@ -136,3 +136,4 @@ class UpdateAccountInfoSerializer(serializers.ModelSerializer):
                 imagekit.files.delete(file_id=new_image_id)
             raise serializers.ValidationError({'Error': f'Could not create user; {db_error}'})
                 
+        return instance

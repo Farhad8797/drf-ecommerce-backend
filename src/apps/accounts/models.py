@@ -29,11 +29,11 @@ class User(AbstractBaseUser):
     email = models.EmailField(verbose_name='email is must', max_length=20, unique=True)
     username = models.CharField(max_length=50)
     created_at = models.TimeField(auto_now_add=True)
-    image = models.URLField(blank=True, null=True)
-    type = models.CharField(choices=UserType.choices, default=UserType.CUSTOMER)
-    status = models.CharField(choices=UserStatus.choices, default=UserStatus.UNVERIFIED)
+    image = models.URLField(blank=True)
+    type = models.CharField(choices=UserType.choices, default=UserType.CUSTOMER, max_length=20)
+    status = models.CharField(choices=UserStatus.choices, default=UserStatus.UNVERIFIED, max_length=20)
     is_active = models.BooleanField(default=True)
-    image_id = models.CharField(blank=True, null=True)
+    image_id = models.CharField(blank=True, max_length=100)
 
     objects=UserManager()
 

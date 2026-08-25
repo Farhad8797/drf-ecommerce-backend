@@ -18,15 +18,16 @@ class Product(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=150)
     brand = models.CharField(max_length=50)
-    catergory = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='products')
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
+    catergory = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='products')
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='products')
 
 
 class ProductVariant(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='variants')
     image = models.URLField(max_length=500)
     expiry_in_months = models.PositiveIntegerField(default=6, validators=[MinValueValidator(1, 'Must have at least one month if specified')], null=True, blank=True)
-    manufacturing_date = models.DateTimeField(null=True, blank=True)
+    manufacturing_date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     stock_quantity = models.PositiveIntegerField(default=1)
+    product_image_id = models.CharField(max_length=250)

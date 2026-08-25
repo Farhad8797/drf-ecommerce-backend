@@ -75,7 +75,7 @@ class OrderReadSerializer(serializers.ModelSerializer):
 
 
 class CreateOrderSerializer(serializers.Serializer):
-    payment_method = serializers.ChoiceField(choices=Order.payment_method.choices)
+    payment_method = serializers.ChoiceField(choices=Order._meta.get_field('payment_method').choices)
 
     def validate(self, attrs):
         user = self.context['request'].user

@@ -52,7 +52,7 @@ class OrderReadView(viewsets.ReadOnlyModelViewSet):
         return Order.objects.filter(orderer = self.request.user).select_related('seller').prefetch_related('items__product_variant__product')
     
 @csrf_exempt
-def verify_wenhook(request):
+def verify_webhook(request):
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     try:
