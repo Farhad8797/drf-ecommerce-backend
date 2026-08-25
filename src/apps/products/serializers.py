@@ -159,7 +159,8 @@ class ProductVariantUpdateSerializer(serializers.ModelSerializer):
         try:
             instance.save()
         except Exception as db_error:
-            imagekit.files.delete(new_image_id)
+            if new_image_id:
+                imagekit.files.delete(new_image_id)
             raise serializers.ValidationError(f'Failed to create product. Error: {db_error}')
         
         return instance
