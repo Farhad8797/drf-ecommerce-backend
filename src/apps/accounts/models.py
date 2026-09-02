@@ -26,14 +26,14 @@ class User(AbstractBaseUser):
         VERIFIED = 'verified', 'Verified'
         UNVERIFIED = 'unverified', 'Unverified'
 
-    email = models.EmailField(verbose_name='email is must', max_length=20, unique=True)
+    email = models.EmailField(verbose_name='email is must', max_length=200, unique=True)
     username = models.CharField(max_length=50)
-    created_at = models.TimeField(auto_now_add=True)
-    image = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    image = models.URLField(blank=True, null=True)
     type = models.CharField(choices=UserType.choices, default=UserType.CUSTOMER, max_length=20)
     status = models.CharField(choices=UserStatus.choices, default=UserStatus.UNVERIFIED, max_length=20)
     is_active = models.BooleanField(default=True)
-    image_id = models.CharField(blank=True, max_length=100)
+    image_id = models.CharField(blank=True, max_length=200, null=True)
 
     objects=UserManager()
 

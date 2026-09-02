@@ -5,7 +5,7 @@ from .models import (
     ProductVariant
 )
 from utils.imagekit import imagekit
-from accounts.serializers import UserSerializer
+from apps.accounts.serializers import UserSerializer
 from django.db import transaction
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -15,7 +15,6 @@ class CategorySerializer(serializers.ModelSerializer):
             'id',
             'product_type'
         ]
-
 
 class ProductVariantReadSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,7 +47,6 @@ class ProductReadSerializer(serializers.ModelSerializer):
             'variants'
         ]
 
-
 class ProductCreateOrUpdateSerializer(serializers.ModelSerializer):
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -68,7 +66,6 @@ class ProductCreateOrUpdateSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
-
 
 class ProductVariantCreateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(allow_null=False, required=True)
@@ -100,8 +97,8 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
                 )
                 image_url = upload_response.url
                 image_id = upload_response.file_id
-                validated_data['image_url'] = image_url
-                validated_data['image_id'] = image_id
+                validated_data['image'] = image_url
+                validated_data['product_image_id'] = image_id
         except Exception as image_upload_error:
             raise serializers.ValidationError(f'Could not upload image. Error: {image_upload_error}')
         
@@ -109,12 +106,11 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
             with transaction.atomic():
                 created_variant = ProductVariant.objects.create(**validated_data)
         except Exception as db_error:
-            if image:
+            if image_id:
                 imagekit.files.delete(image_id)
             raise serializers.ValidationError(f'Failed to create product. Error: {db_error}')
     
         return created_variant
-        
 
 class ProductVariantUpdateSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(allow_null=True, required=False)

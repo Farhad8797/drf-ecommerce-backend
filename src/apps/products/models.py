@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 import uuid
+from django.utils.text import slugify
 
 class Category(models.Model):
     class ProductType(models.TextChoices):
@@ -12,7 +13,6 @@ class Category(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     product_type = models.CharField(choices=ProductType.choices, max_length=100)
 
-
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=50)
@@ -20,7 +20,12 @@ class Product(models.Model):
     brand = models.CharField(max_length=50)
     catergory = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='products')
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='products')
+    slug = models.SlugField(unique=True, max_length=255, db_index=True, blank=True)
 
+    def save(self, *, force_insert = False, force_update = False, using = None, update_fields = None):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 class ProductVariant(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='variants')

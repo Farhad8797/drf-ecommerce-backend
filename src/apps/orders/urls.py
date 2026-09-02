@@ -5,11 +5,6 @@ from .views import (
     OrderReadView,
     verify_webhook
 )
-from rest_framework.routers import DefaultRouter
-
-# Router for viewset
-# router = DefaultRouter()
-# router.register('cart/items/', CartItemViewSet, basename='cart_items')
 
 urlpatterns = [
     path('cart/items/',CartItemViewSet.as_view({'get': 'list', 'post': 'create'}),name='cart_item_list'),
