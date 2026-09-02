@@ -16,17 +16,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         write_only=True,
         style={'input_type': 'password'}
     )
-    image = serializers.ImageField(allow_null=True, required=False, write_only=True)
+    image_file = serializers.ImageField(allow_null=True, required=False, write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'image', 'type', 'image_id']
+        fields = ['username', 'email', 'password', 'image', 'type', 'image_id', 'image_file', 'created_at']
+        read_only_fields = ['image', 'image_id', 'status']
 
     def validate(self, attrs:dict) -> dict:
-        image = attrs.get('image', None)
+        image_file = attrs.get('image_file', None)
         type = attrs.get('type')
 
-        if type == User.UserType.MERCHANT and not image:
+        if type == User.UserType.MERCHANT and not image_file:
             raise serializers.ValidationError({
                 'image': 'An image is required when registering as a merchant.'
             })
@@ -34,18 +35,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data: dict):
-        image = validated_data.pop('image', None)
-        image_url, image_id = None, None
-        if image:
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
             try:
                 upload_response = imagekit.files.upload(
-                    file=image.read(),
+                    file=image_file.read(),
                     folder='/users/avatars',
-                    file_name=image.name
+                    file_name=image_file.name
                 )
-                image_url = upload_response.url
-                image_id = upload_response.file_id
-                validated_data['image'] = image_url
+                validated_data['image'] = upload_response.url
+                validated_data['image_id'] = upload_response.file_id
             except Exception as e:
                 raise serializers.ValidationError({
                     'image': f'Image upload failed: {str(e)}'
