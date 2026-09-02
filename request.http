@@ -1,50 +1,64 @@
-## variables
-@base_url = http://127.0.0.1:8000/
+POST http://127.0.0.1:8000/api/auth/sign-up/
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
-### register user
-POST {{base_url}}/api/auth/sign-up/
-Content-Type: application/json
+--WebAppBoundary
+Content-Disposition: form-data; name="email"
 
-{
-    "email": "gdvbhgbhb@gmail.com",
-    "password": "Password123!",
-    "username": "Dummy3"
-}
+merchant@example.com
+--WebAppBoundary
+Content-Disposition: form-data; name="username"
 
-### sign-in
-POST {{base_url}}/api/auth/sign-in/
-Content-Type: application/json
+merchant_store
+--WebAppBoundary
+Content-Disposition: form-data; name="password"
 
-{
-    "email": "gdvbhgbhb@gmail.com",
-    "password": "Password123!"
-}
+SecurePassword123!
+--WebAppBoundary
+Content-Disposition: form-data; name="type"
 
-### see account info
+merchant
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="store_profile.jpg"
+Content-Type: image/jpeg
 
-GET {{base_url}}/api/auth/u/
+< C:/Users/HP/Downloads/amirali-mirhashemian-jh5XyK4Rr3Y-unsplash.jpg
+--WebAppBoundary--
 
-### updating info
-PUT {{base_url}}/api/auth/u/update-info/
-Content-Type: application/json
-
-{
-    "username": "Fahad Bin Ibrahim",
-    "type": "customer",
-    "status": "verified"
-}
-
-### getting new access token
-GET {{base_url}}/api/auth/new-access-token/
-
-### Setting new password
-POST {{base_url}}/api/auth/u/change-password/
-Content-Type: application/json
+###
+POST http://127.0.0.1:8000/api/auth/sign-in/
+Content-Type:application/json
 
 {
-    "new_password": "123",
-    "old_password": "I_love_django_34@"
+    "email":"merchant@example.com",
+    "password":"SecurePassword123!"
 }
 
-### deleting user
-DELETE {{base_url}}/api/auth/u/delete-account/
+### 
+POST http://127.0.0.1:8000/api/auth/sign-out/
+
+###
+GET http://127.0.0.1:8000/api/auth/u/
+
+###
+PATCH http://127.0.0.1:8000/api/auth/u/update-info/
+Content-Type:application/json
+
+{
+    "username":"Fahad Bin Ibrahim"
+}
+
+###
+POST http://127.0.0.1:8000/api/auth/u/change-password/
+Content-Type:application/json
+
+{
+    "old_password":"SecurePassword123!",
+    "new_password":"fh012@34"
+}
+###
+
+###
+POST http://127.0.0.1:8000/api/auth/new-access-token/
+
+###
+DELETE http://127.0.0.1:8000/api/auth/u/delete-account/

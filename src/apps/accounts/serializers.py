@@ -52,19 +52,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         try:
             with transaction.atomic():
-                user = User.objects.create_user(
-                    email=validated_data['email'],
-                    username=validated_data['username'],
-                    password=validated_data['password'],
-                    type=validated_data.get('type', User.UserType.CUSTOMER),
-                    image=image_url or None,
-                    image_id=image_id or None
-                )
+                user = User.objects.create_user(**validated_data)
                 return user
             
         except Exception as db_error:
-            if image_id:
-                imagekit.files.delete(file_id=image_id)
+            if image_file:
+                imagekit.files.delete(file_id=validated_data['image_id'])
             raise serializers.ValidationError({'Error': f'Could not create user; {db_error}'})
 
 class ChangePasswordSerializer(serializers.Serializer):
