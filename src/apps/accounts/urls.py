@@ -7,7 +7,9 @@ from .views import (
     UpdateAccountInfoView,
     ChangePasswordView,
     NewAccessTokenView,
-    DeleteAccountView
+    DeleteAccountView,
+    StripeAccountWebhookView,
+    StripeOnboardingView
 )
 
 urlpatterns = [
@@ -18,5 +20,7 @@ urlpatterns = [
     path('u/update-info/', UpdateAccountInfoView.as_view(), name='update_info'),
     path('u/change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('new-access-token/', NewAccessTokenView.as_view(), name='new_access_token'),
-    path('u/delete-account/', DeleteAccountView.as_view(), name='delete_account')
+    path('u/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
+    path('stripe/onboard/', StripeOnboardingView.as_view(), name='stripe-onboard'),
+    path('stripe/webhook/', StripeAccountWebhookView.as_view(), name='stripe-account-webhook'),
 ]

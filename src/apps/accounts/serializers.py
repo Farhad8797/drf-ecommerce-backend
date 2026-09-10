@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, password_validation
 from utils.imagekit import imagekit
 from django.db import transaction
+from django.conf import settings
+from utils.stripe import is_merchant_account_ready
 
 User = get_user_model()
 
@@ -27,11 +29,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         image_file = attrs.get('image_file', None)
         type = attrs.get('type')
 
-        if type == User.UserType.MERCHANT and not image_file:
-            raise serializers.ValidationError({
-                'image': 'An image is required when registering as a merchant.'
-            })
-        
+        if type == User.UserType.MERCHANT:
+            if not image_file:
+                raise serializers.ValidationError({
+                    'image': 'An image is required when registering as a merchant.'
+                })
+
         return attrs
     
     def create(self, validated_data: dict):
@@ -80,21 +83,38 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
     
 class UpdateAccountInfoSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(write_only=True, allow_null=True, required=False)
+    image_file = serializers.ImageField(write_only=True, allow_null=True, required=False)
     class Meta:
         model = User
-        fields = ['username', 'image', 'type']
+        fields = ['username', 'image', 'type', 'stripe_account_id', 'paypal_account_id', 'image_id', 'image_file', 'status']
+        read_only_fields = ['image', 'image_id', 'status']
 
     def validate(self, attrs : dict) -> dict:
         user_type = attrs.get('type', getattr(self.instance, 'type', None))
-        new_image = attrs.get('image', None)
+        new_image = attrs.get('image_file', None)
         existing_image = getattr(self.instance, 'image', None)
-        if(user_type == User.UserType.MERCHANT and not (new_image or existing_image)):
-            raise serializers.ValidationError('Merchant must have an image')
+        new_stripe_id = attrs.get('stripe_account_id', None)
+        new_paypal_id = attrs.get('paypal_account_id', None)
+        stripe_id = new_stripe_id or getattr(self.instance, 'stripe_account_id', None)
+        paypal_id = new_paypal_id or getattr(self.instance, 'paypal_account_id', None)
+
+        if user_type == User.UserType.MERCHANT:
+            if not (new_image or existing_image):
+                raise serializers.ValidationError({'error':'No image provided and no existing image found for this user. A merchant must have at least one image.'})
+            
+            if not stripe_id and not paypal_id:
+                raise serializers.ValidationError({'error': 'No payment method id provided! A merchant must provide paypal or stripe id.'})
+            
+            if new_stripe_id:
+                if not is_merchant_account_ready(stripe_id):
+                    raise serializers.ValidationError({
+                        'stripe_account_id': 'This Stripe account is not fully verified or ready for payouts yet.'
+                    })
+            attrs['status'] = User.UserStatus.VERIFIED
         return attrs
     
     def update(self, instance, validated_data: dict):
-        new_image = validated_data.pop('image', None)
+        new_image = validated_data.pop('image_file', None)
         new_image_url, new_image_id  = None, None
         old_image_url, old_image_id = getattr(instance, 'image', None), getattr(instance, 'image_id', None)
 
@@ -117,7 +137,7 @@ class UpdateAccountInfoSerializer(serializers.ModelSerializer):
             setattr(instance, key, val)
 
         try:
-            if old_image_url and new_image:
+            if old_image_url and new_image_url:
                 imagekit.files.delete(file_id=old_image_id)
             if new_image_url:
                 instance.image, instance.image_id = new_image_url, new_image_id

@@ -26,17 +26,18 @@ class CartItemViewSet(viewsets.ModelViewSet):
 class CreateOrderView(views.APIView):
     permission_classes = [IsAuthenticated]
     with transaction.atomic():
-        def post(self, request):
-            serializer = CreateOrderSerializer(data=request.data, context={'request': request})
+        def post(self):
+            serializer = CreateOrderSerializer(data=self.request.data, context={'request': self.request})
             serializer.is_valid(raise_exception=True)
-            order = serializer.save(user=request.user, status='PENDING')
+            order = serializer.save(user=self.request.user, status='PENDING')
             amount_in_cents = int(order.total_price * 100)
 
             try:
                 payment_intent = create_payment_intent(
                     amount_in_cents=amount_in_cents,
-                    currency='usd',
-                    metadata={'order_id': order.id, 'user_id': request.user.id}
+                    metadata={'order_id': order.id, 'user_id': self.request.user.id},
+                    merchant_stripe_account_id=self.request.user.stripe_account_id,
+                    application_fee_in_cents=amount_in_cents*0.1
                 )
 
                 order.stripe_payment_intent_id = payment_intent.id
@@ -78,7 +79,6 @@ def verify_webhook(request):
             if order.payment_status != Order.PaymentStatus.FAILED:
                 order.payment_status = Order.PaymentStatus.FAILED
                 order.save()
-                Cart.objects.filter(creator = order.orderer).delete()
         except Order.DoesNotExist:
             return HttpResponse('No order found!', status=404)
         
