@@ -9,15 +9,18 @@ from .serializers import (
 
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.generics import DestroyAPIView
-from .permissions import IsMerchantOwner
+from .permissions import IsMerchantOwner, IsMerchant
 from .models import Category, Product, ProductVariant
 
-class CategoryView(viewsets.ReadOnlyModelViewSet):
+class CategoryView(viewsets.ModelViewSet):
     queryset = Category.objects.all()
-    permission_classes = [AllowAny]
-    serializer_class = CategorySerializer
     lookup_field = 'product_type'
+    serializer_class = CategorySerializer
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        else:
+            return [IsAuthenticated(), IsMerchant()]
 
 class ProductReadView(viewsets.ReadOnlyModelViewSet):
     queryset = Product.objects.all()

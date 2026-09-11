@@ -97,20 +97,21 @@ class UpdateAccountInfoSerializer(serializers.ModelSerializer):
         new_paypal_id = attrs.get('paypal_account_id', None)
         stripe_id = new_stripe_id or getattr(self.instance, 'stripe_account_id', None)
         paypal_id = new_paypal_id or getattr(self.instance, 'paypal_account_id', None)
+        user_status = getattr(self.instance, 'status', None)
 
         if user_type == User.UserType.MERCHANT:
             if not (new_image or existing_image):
                 raise serializers.ValidationError({'error':'No image provided and no existing image found for this user. A merchant must have at least one image.'})
             
-            if not stripe_id and not paypal_id:
-                raise serializers.ValidationError({'error': 'No payment method id provided! A merchant must provide paypal or stripe id.'})
-            
-            if new_stripe_id:
-                if not is_merchant_account_ready(stripe_id):
-                    raise serializers.ValidationError({
-                        'stripe_account_id': 'This Stripe account is not fully verified or ready for payouts yet.'
-                    })
-            attrs['status'] = User.UserStatus.VERIFIED
+            if user_status == User.UserStatus.VERIFIED:
+                if not stripe_id and not paypal_id:
+                    raise serializers.ValidationError({'error': 'No payment method id provided! A merchant must provide paypal or stripe id.'})
+                
+                if new_stripe_id:
+                    if not is_merchant_account_ready(stripe_id):
+                        raise serializers.ValidationError({
+                            'stripe_account_id': 'This Stripe account is not fully verified or ready for payouts yet.'
+                        })
         return attrs
     
     def update(self, instance, validated_data: dict):

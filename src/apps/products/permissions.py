@@ -13,3 +13,11 @@ class IsMerchantOwner(permissions.BasePermission):
             return obj.product.seller == request.user
         
         return False
+    
+class IsMerchant(permissions.BasePermission):
+    def has_permission(self, request, view) -> bool:
+        return bool(
+            request.user and 
+            request.user.is_authenticated and 
+            getattr(request.user, 'type', None) == User.UserType.MERCHANT
+        )

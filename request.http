@@ -18,7 +18,7 @@ Content-Disposition: form-data; name="type"
 
 merchant
 --WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="store_profile.jpg"
+Content-Disposition: form-data; name="image_file"; filename="store_profile.jpg"
 Content-Type: image/jpeg
 
 < C:/Users/HP/Downloads/amirali-mirhashemian-jh5XyK4Rr3Y-unsplash.jpg
@@ -30,7 +30,7 @@ Content-Type:application/json
 
 {
     "email":"merchant@example.com",
-    "password":"SecurePassword123!"
+    "password":"fh012@34"
 }
 
 ### 
@@ -62,3 +62,101 @@ POST http://127.0.0.1:8000/api/auth/new-access-token/
 
 ###
 DELETE http://127.0.0.1:8000/api/auth/u/delete-account/
+
+###
+PATCH http://127.0.0.1:8000/api/auth/u/update-info/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="username"
+
+Fahad Bin Ibrahim
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:/Users/HP/Downloads/laura-chouette-gbT2KAq1V5c-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Request : Create Hardware Category
+POST http://127.0.0.1:8000/api/v1/category/
+Content-Type: application/json
+
+{
+  "product_type": "HARDWARE"
+}
+
+### Request 2: Create Digital Category
+POST http://127.0.0.1:8000/api/v1/category/
+Content-Type: application/json
+
+{
+  "product_type": "DIGITAL"
+}
+
+### Request 3: Create Luxury & Cosmetics Category
+POST http://127.0.0.1:8000/api/v1/category/
+Content-Type: application/json
+
+{
+  "product_type": "OTHERS"
+}
+
+### Request 4: Create Second Category under OTHERS Choice
+POST http://127.0.0.1:8000/api/v1/category/
+Content-Type: application/json
+
+{
+  "product_type": "OTHERS"
+}
+
+### Delete Category by product_type
+DELETE http://127.0.0.1:8000/api/v1/category/HARDWARE/
+
+### Product 1: Hardware (Mechanical Keyboard)
+POST http://127.0.0.1:8000/api/v1/c/product/
+Content-Type: application/json
+
+{
+  "name": "Keychron K2 Pro Wireless Mechanical Keyboard",
+  "description": "QMK/VIA wireless custom mechanical keyboard with hot-swappable switches and RGB backlighting.",
+  "brand": "Keychron",
+  "category": "7781acf4-de4f-4b86-92f2-0e2b5e901705"
+}
+
+### Product 2: Digital (Software License)
+POST http://127.0.0.1:8000/api/v1/c/product/
+Content-Type: application/json
+
+{
+  "name": "DevSuite Pro - 1 Year Merchant License",
+  "description": "Single-user annual license key for DevSuite Pro, including all minor/major version updates and priority API access.",
+  "brand": "DevSuite",
+  "category": "e0c461b4-69d6-4ea3-ab69-d70cac8b8436"
+}
+
+### Product 3: Luxury & Cosmetics (Fragrance)
+POST http://127.0.0.1:8000/api/v1/c/product/
+Content-Type: application/json
+
+{
+  "name": "Velvet Oud Eau de Parfum - 100ml",
+  "description": "A luxury unisex fragrance with notes of oriental oud, smoky incense, and warm amber.",
+  "brand": "Lattafa",
+  "category": "7781acf4-de4f-4b86-92f2-0e2b5e901705"
+}
+
+### Product 4: Hardware (Ergonomic Mouse)
+POST http://127.0.0.1:8000/api/v1/c/product/
+Content-Type: application/json
+
+{
+  "name": "MX Master 3S Wireless Performance Mouse",
+  "description": "An iconic ergonomic wireless mouse with 8K DPI glass tracking and quiet clicks.",
+  "brand": "Logitech",
+  "category": "870be905-6f58-43ee-90e4-4f6be25f1a24"
+}
+
+### Reading Product
+GET http://127.0.0.1:8000/api/v1/product/devsuite-pro-1-year-merchant-license/
+

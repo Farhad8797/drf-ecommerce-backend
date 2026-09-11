@@ -133,7 +133,7 @@ class StripeOnboardingView(APIView):
             return_url  = 'http://127.0.0.1:8000/api/accounts/stripe/return/'
             refresh_url = 'http://127.0.0.1:8000/api/accounts/stripe/refresh/'
 
-            account_link = create_account_onboarding_link(stripe_account_id=user.stripe_account_id, refresh_url=refresh_url, refresh_url=refresh_url)
+            account_link = create_account_onboarding_link(stripe_account_id=user.stripe_account_id, refresh_url=refresh_url)
             return Response({"onboarding_url": account_link.url}, status=status.HTTP_200_OK)
 
         except Exception as e:

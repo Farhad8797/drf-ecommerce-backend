@@ -18,7 +18,7 @@ class Product(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=150)
     brand = models.CharField(max_length=50)
-    catergory = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='products')
+    category = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='products')
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='products')
     slug = models.SlugField(unique=True, max_length=255, db_index=True, blank=True)
 

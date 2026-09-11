@@ -9,7 +9,7 @@ from apps.accounts.serializers import UserSerializer
 from django.db import transaction
 
 class CategorySerializer(serializers.ModelSerializer):
-    class Mwta:
+    class Meta:
         model = Category
         fields = [
             'id',
@@ -44,7 +44,8 @@ class ProductReadSerializer(serializers.ModelSerializer):
             'brand',
             'category',
             'seller',
-            'variants'
+            'variants',
+            'slug'
         ]
 
 class ProductCreateOrUpdateSerializer(serializers.ModelSerializer):
@@ -58,40 +59,37 @@ class ProductCreateOrUpdateSerializer(serializers.ModelSerializer):
             'description',
             'brand',
             'category',
-            'seller'
+            'seller',
+            'slug'
         ]
 
-    def create(self, validated_data):
-        return super().create(validated_data)
-    
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
 
 class ProductVariantCreateSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(allow_null=False, required=True)
+    image_file = serializers.ImageField(allow_null=False, required=True, write_only=True)
 
     class Meta:
         model = ProductVariant
         fields = [
             'id',
+            'image_file',
             'product',
             'image',
             'expiry_in_months',
-            'manufacturing_data',
+            'manufacturing_date',
             'created_at',
             'price',
             'stock_quantity',
-            'product_image_id'
+            'product_image_id',
         ]
-        read_only_fields = ['id', 'created_at', 'product_image_id']
+        read_only_fields = ['id', 'created_at', 'product_image_id', 'image']
 
     def create(self, validated_data: dict):
-        image = validated_data.pop('image', None)
+        image = validated_data.pop('image_file', None)
         image_id, image_url = None, None
         try:
             if image:
                 upload_response = imagekit.files.upload(
-                    file=image,
+                    file=image.read(),
                     folder='/product',
                     file_name=image.name
                 )
@@ -113,32 +111,33 @@ class ProductVariantCreateSerializer(serializers.ModelSerializer):
         return created_variant
 
 class ProductVariantUpdateSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(allow_null=True, required=False)
+    image_file = serializers.ImageField(allow_null=True, required=False, write_only=True)
     
     class Meta:
         model = ProductVariant
         fields = [
             'id',
             'product',
+            'image_file',
             'image',
             'expiry_in_months',
-            'manufacturing_data',
+            'manufacturing_date',
             'created_at',
             'price',
             'stock_quantity',
             'product_image_id'
         ]
-        read_only_fields = ['id', 'created_at', 'product_image_id']
+        read_only_fields = ['id', 'created_at', 'product_image_id', 'image']
 
     def update(self, instance, validated_data: dict):
-        image = validated_data.pop('image', None)
+        image = validated_data.pop('image_file', None)
         existing_image_id = getattr(instance, 'product_image_id', None)
         new_image_id, new_image_url = None, None
         if image:
             try:
                 imagekit.files.delete(existing_image_id)
                 upload_response = imagekit.files.upload(
-                    file=image,
+                    file=image.read(),
                     file_name=image.name,
                     folder='/product'
                 )
