@@ -22,6 +22,7 @@ A secure backend service built with **Django** and the modern **Stripe Python SD
 - **Environment Management**: `uv` package manager / python-dotenv
 - **Database**: [Supbase](https://supabase.com/)
 - **Media storage**: [Imagekit](https://imagekit.io/)
+- **Api endpoint testing**: VScode restclient
 
 ---
 
