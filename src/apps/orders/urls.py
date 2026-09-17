@@ -1,9 +1,9 @@
-from django.urls import path, include
+from django.urls import path
 from .views import (
     CartItemViewSet,
     CreateOrderView,
     OrderReadView,
-    verify_webhook
+    OrderWebhookVerifyView
 )
 
 urlpatterns = [
@@ -15,5 +15,5 @@ urlpatterns = [
     ),
     path('orders/', CreateOrderView.as_view(), name='create_order'),
     path('orders/history/', OrderReadView.as_view({'get': 'list'}), name='order_history'),
-    path('payment/webhook/', verify_webhook, name='verify_webhook')
+    path('payment/webhook/', OrderWebhookVerifyView.as_view(), name='verify_webhook')
 ]

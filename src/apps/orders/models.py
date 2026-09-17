@@ -19,7 +19,6 @@ class Order(models.Model):
 
     class DeliveryStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending'
-        SHIPPED = 'SHIPPED', 'Shipped'
         DELIVERED = 'DELIVERED', 'Delivered'
         CANCELLED = 'CANCELLED', 'Cancelled'
 

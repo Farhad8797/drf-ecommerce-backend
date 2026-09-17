@@ -1,17 +1,18 @@
 import stripe
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
-from rest_framework import viewsets, views
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, views, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError
 from .serializers import (
     CartItemSerializer, CartReadSerializer,
     OrderItemSerializer, OrderReadSerializer, CreateOrderSerializer
 )
-from utils.stripe import create_payment_intent, verify_webhook_signature
+from utils.stripeConfig import create_payment_intent, verify_webhook_signature
 from .models import CartItem, Cart, Order
+from apps.products.models import ProductVariant
 from django.http import HttpResponse
+from django.db.models import F
 
 class CartItemViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -52,37 +53,56 @@ class OrderReadView(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return Order.objects.filter(orderer = self.request.user).select_related('seller').prefetch_related('items__product_variant__product')
     
-@csrf_exempt
-def verify_webhook(request):
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    try:
-        event = verify_webhook_signature(payload=payload, sig_header=sig_header)
-    except (ValueError, stripe.SignatureVerificationError):
-        return HttpResponse('Could not verify stripe signature', status=400)
-    
-    order_id = event['data']['object']['metadata']['order_id']
-    # handle successful payment
-    if event['type'] == 'payment_intent.succeeded':
-        try:
-            order = Order.objects.get(id=order_id)
-            if order.payment_status != Order.PaymentStatus.PAID:
-                order.payment_status = Order.PaymentStatus.PAID
-                order.save()
-                Cart.objects.filter(creator = order.orderer).delete()
-        except Order.DoesNotExist:
-            return HttpResponse('No order found!', status=404)
-        
-    elif event['type'] == 'payment_intent.payment_failed':
-        try:
-            order = Order.objects.get(id=order_id)
-            if order.payment_status != Order.PaymentStatus.FAILED:
-                order.payment_status = Order.PaymentStatus.FAILED
-                order.save()
-        except Order.DoesNotExist:
-            return HttpResponse('No order found!', status=404)
-        
-    else: 
-        pass
+class OrderWebhookVerifyView(views.APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
-    return HttpResponse('Payment successful!', status=200)
+    def post(self):
+        payload = self.request.body
+        sig_header = self.request.META.get('HTTP_STRIPE_SIGNATURE')
+
+        if not sig_header:
+            return Response({"error": "Missing Stripe signature header."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            event = verify_webhook_signature(
+                payload=payload,
+                sig_header=sig_header
+            )
+
+        except (ValueError, stripe.SignatureVerificationError):
+            return Response({'error': 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        stripe_obj = event['data']['object']
+        metadata = stripe_obj.get('metadata', {})
+        order_id = metadata.get('order_id')
+
+        if not order_id:
+            return Response({'error': 'Missing order_id in metadata'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if event['type'] == 'payment_intent.succeeded':
+            try:
+                with transaction.atomic():
+                    order = (
+                        Order.objects
+                        .prefetch_related('order_items__product_variant')
+                        .select_for_update()
+                        .filter(id=order_id)
+                    )
+                    if order.payment_status != Order.PaymentStatus.PAID:
+                        order.payment_status = Order.PaymentStatus.PAID
+                        order.save(update_fields=['payment_status'])
+
+                        for item in order.order_items.all():
+                            ProductVariant.objects.filter(id=item.product_variant).update(
+                                stock_quantity=F('stock_quantity') - item.quantity
+                            )
+
+                        Cart.objects.filter(creator=order.orderer).delete()
+
+            except Order.DoesNotExist:
+                return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        elif event['type'] == 'payment_intent.payment_failed':
+            Order.objects.filter(id=order_id).update(payment_status=Order.PaymentStatus.FAILED)
+
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)

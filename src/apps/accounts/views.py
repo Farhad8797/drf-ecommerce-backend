@@ -7,14 +7,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from rest_framework.parsers import BaseParser
+from utils.stripeConfig import stripe_client, create_express_account, create_account_onboarding_link, verify_webhook_signature
+
 
 from .serializers import (UserSerializer, 
                          UserRegistrationSerializer, 
                          UpdateAccountInfoSerializer, 
                          ChangePasswordSerializer)
-from utils.stripe import create_express_account, create_account_onboarding_link, verify_webhook_signature
 
 User = get_user_model()
+
+class RawBytesParser(BaseParser):
+    media_type = '*/*'
+    def parse(self, stream, media_type=None, parser_context=None):
+        return stream.read()
 
 class SignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -117,8 +125,8 @@ class NewAccessTokenView(TokenRefreshView):
 class StripeOnboardingView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self):
-        user = self.request.user
+    def post(self, request, *args, **kwargs):
+        user = request.user
         if user.type != user.UserType.MERCHANT:
             return Response(
                 {"error": "Only merchant accounts can initiate payment onboarding."},
@@ -133,42 +141,58 @@ class StripeOnboardingView(APIView):
             return_url  = 'http://127.0.0.1:8000/api/accounts/stripe/return/'
             refresh_url = 'http://127.0.0.1:8000/api/accounts/stripe/refresh/'
 
-            account_link = create_account_onboarding_link(stripe_account_id=user.stripe_account_id, refresh_url=refresh_url)
+            account_link = create_account_onboarding_link(stripe_account_id=user.stripe_account_id, refresh_url=refresh_url, return_url=return_url)
             return Response({"onboarding_url": account_link.url}, status=status.HTTP_200_OK)
 
         except Exception as e:
+            print("ONBOARDING ERROR TRACE:", repr(e))
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class StripeAccountWebhookView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
 
-    def post(self):
-        payload = self.request.body
-        sig_header = self.request.META.get('HTTP_STRIPE_SIGNATURE')
+    def post(self, request, *args, **kwargs):
+        payload = request.body
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
 
         if not sig_header:
             return Response({"error": "Missing Stripe signature header."}, status=status.HTTP_400_BAD_REQUEST)
         
+        # try:
         try:
             event: dict = verify_webhook_signature(payload=payload, sig_header=sig_header)
             if event['type'] == 'account.updated':
-                obj: dict = event['data']['object']
-                id = obj['id']
-                charges_enabled, payouts_enabled = obj.get('charges_enabled', False), obj.get('payouts_enabled', False)
+                related_obj = event['related_object']
+                account_id = related_obj['id']
 
-                user = User.objects.filter(stripe_account_id=id).first()
-                if charges_enabled and payouts_enabled:
-                    if user.status != user.UserStatus.VERIFIED:
-                        user.status = User.UserStatus.VERIFIED
-                        user.save(update_fields=['status'])
-                        return Response({"status": "success"}, status=status.HTTP_200_OK)
-                else:
-                    if user.status != user.UserStatus.UNVERIFIED:
-                        user.status = User.UserStatus.UNVERIFIED
-                        user.save(update_fields=['status'])
-                        return Response({"status": "User unverified"}, status=status.HTTP_200_OK)
+                user = User.objects.filter(stripe_account_id=account_id).first()
+            if not user:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            stripe_account = stripe_client.v2.core.accounts.retrieve(account_id, {"include":["configuration.merchant", "requirements"]})
+            
+            merchant_capabilities = stripe_account['configuration']['merchant']['capabilities']
+            card_payments = merchant_capabilities['card_payments']
+            stripe_balance = merchant_capabilities['stripe_balance']
+            is_fully_active = (
+                card_payments['status'] == 'active' and 
+                stripe_balance['payouts']['status'] == 'active'
+            )
+
+            target_status = User.UserStatus.VERIFIED if is_fully_active else User.UserStatus.UNVERIFIED
+
+            if user.status != target_status:
+                user.status = target_status
+                user.save(update_fields=['status'])
+
+            response_message = "success" if is_fully_active else "User unverified"
+            return Response({"status": response_message}, status=status.HTTP_200_OK)
+            # return Response(stripe_account.to_dict())
+
         except Exception as e:
+            print("RAW REQUEST BODY:", request.body)
+            print("RECEIVED SIGNATURE:", request.META.get('HTTP_STRIPE_SIGNATURE'))
             return Response({"error": f"Webhook verification failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteAccountView(generics.DestroyAPIView):

@@ -160,3 +160,163 @@ Content-Type: application/json
 ### Reading Product
 GET http://127.0.0.1:8000/api/v1/product/devsuite-pro-1-year-merchant-license/
 
+### Product Variant 1: Keyboard (Hardware - Black Switches)
+POST http://127.0.0.1:8000/api/v1/c/product-variant/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="product"
+
+ac993d4f-db77-45bf-b4c2-163bf9af6396
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+89.99
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stock_quantity"
+
+50
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="manufacturing_date"
+
+2026-01-15
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="expiry_in_months"
+
+24
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="keyboard_black.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\stefen-tan-KYw1eUx1J7Y-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Product Variant 2: Software License (Digital)
+POST http://127.0.0.1:8000/api/v1/c/product-variant/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="product"
+
+35b2bdf6-f7e1-4829-b1d9-6536761683de
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+199.00
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stock_quantity"
+
+999
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="manufacturing_date"
+
+2026-03-01
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="expiry_in_months"
+
+12
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="devsuite_banner.png"
+Content-Type: image/png
+
+< C:\Users\HP\Downloads\phil-shaw-U9zkBMx-QHY-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Product Variant 3: Fragrance (Luxury/Cosmetics - 100ml Bottle)
+POST http://127.0.0.1:8000/api/v1/c/product-variant/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="product"
+
+d3f63de8-efea-40db-b4be-972bdbaab1ce
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+65.50
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stock_quantity"
+
+30
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="manufacturing_date"
+
+2026-02-10
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="expiry_in_months"
+
+36
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="perfume_bottle.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\laura-chouette-gbT2KAq1V5c-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Product Variant 4: Ergonomic Mouse (Hardware - Gray)
+POST http://127.0.0.1:8000/api/v1/c/product-variant/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="product"
+
+01cfa03e-064e-465c-a930-7546ee803afb
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+99.99
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stock_quantity"
+
+15
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="manufacturing_date"
+
+2026-01-20
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="expiry_in_months"
+
+24
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="mouse_gray.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\oscar-ivan-esquivel-arteaga-ZtxED1cpB1E-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Updating a varient
+PATCH http://127.0.0.1:8000/api/v1/u/product-variant/7/
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+150.00
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stock_quantity"
+
+10
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="expiry_in_months"
+
+36
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image_file"; filename="gaming_mouse.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\HP\Downloads\maar-gaming-Pv--vb5vwzQ-unsplash.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Deleting a variant
+DELETE http://127.0.0.1:8000/api/v1/u/product-variant/7/
+
+###
+POST http://127.0.0.1:8000/api/auth/stripe/onboard/
+Content-Type: application/json
+
+### This request body is converted into bytes, so it is written within a single line.
+POST http://127.0.0.1:8000/api/auth/stripe/webhook/
+Content-Type: application/json
+Stripe-Signature: t=1789492668,v1=389d6f83cfcdcda8a20553745f3ce22b1a139d5e230dc1c531e07f29570961e4
+
+{"id":"evt_2N00002eZvKYlo2Cxxxxxx","object":"event","api_version":"v2","created":1789492668,"type":"account.updated","related_object":{"id":"acct_1UF3PIIvl9a7wu2r","type":"account","url":"/v2/core/accounts/acct_1UF3PIIvl9a7wu2r"}}

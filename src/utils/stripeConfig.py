@@ -5,30 +5,45 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 stripe_client = stripe.StripeClient(api_key=settings.STRIPE_SECRET_KEY)
 
-def create_express_account(email: str) -> stripe.Account:
+def create_express_account(email: str, business_name: str = "Merchant Store", country: str = "US") -> stripe.Account:
     try:
-        return stripe_client.v1.accounts.create(
-            params={
-                "type": "express",
-                "email": email,
-                "capabilities": {
-                    "card_payments": {"requested": True},
-                    "transfers": {"requested": True},
-                }
+        account = stripe_client.v2.core.accounts.create(
+            {
+                "contact_email": email,
+                "display_name": business_name,
+                "dashboard": "full",
+                "identity": {
+                    "business_details": {"registered_name": business_name},
+                    "country": "us",
+                    "entity_type": "company",
+                },
+                "configuration": {"merchant": {"capabilities": {"card_payments": {"requested": True}}}},
+                "defaults": {
+                    "currency": "usd",
+                    "responsibilities": {"fees_collector": "stripe", "losses_collector": "stripe"},
+                    "locales": ["en-US"],
+                },
+                "include": ["configuration.merchant", "identity", "requirements"],
             }
         )
+        return account
     except stripe.StripeError as e:
         logger.error(f"Stripe Express account creation error: {e.user_message or str(e)}")
         raise e
     
 def create_account_onboarding_link(stripe_account_id: str, return_url: str, refresh_url: str) -> stripe.AccountLink:
     try:
-        return stripe_client.v1.account_links.create(
-            params={
+        return stripe_client.v2.core.account_links.create(
+            {
                 "account": stripe_account_id,
-                "refresh_url": refresh_url,
-                "return_url": return_url,
-                "type": "account_onboarding",
+                "use_case": {
+                    "type": "account_onboarding",
+                    "account_onboarding": {
+                        "configurations": ["merchant"],
+                        "return_url": return_url,
+                        "refresh_url": refresh_url,
+                    },
+                },
             }
         )
     except stripe.StripeError as e:
@@ -78,7 +93,8 @@ def verify_webhook_signature(payload: bytes, sig_header: str) -> stripe.Event:
         event = stripe.Webhook.construct_event(
             payload=payload,
             sig_header=sig_header,
-            secret=settings.STRIPE_WEBHOOK_SECRET
+            secret=settings.STRIPE_WEBHOOK_SECRET,
+            tolerance=None # In live site, tolerance=None is never used.
         )
         return event
     except ValueError as e:

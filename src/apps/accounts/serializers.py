@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, password_validation
 from utils.imagekit import imagekit
 from django.db import transaction
 from django.conf import settings
-from utils.stripe import is_merchant_account_ready
+from utils.stripeConfig import is_merchant_account_ready
 
 User = get_user_model()
 
