@@ -34,8 +34,8 @@ def generate_stripe_signature(payload, secret):
     print(f"t={timestamp},v1={signature}", payload_string)
     return f"t={timestamp},v1={signature}", payload_string
 
-pyaload = '''{"id":"evt_2N00002eZvKYlo2Cxxxxxx","object":"event","api_version":"v2","created":1789492668,"type":"account.updated","related_object":{"id":"acct_1UF3PIIvl9a7wu2r","type":"account","url":"/v2/core/accounts/acct_1UF3PIIvl9a7wu2r"}}'''
+payload = '''{"id":"evt_2N00002eZvKYlo2Cxxxxxx","object":"event","api_version":"v2","created":1789492668,"type":"account.updated","related_object":{"id":"acct_1UF3PIIvl9a7wu2r","type":"account","url":"/v2/core/accounts/acct_1UF3PIIvl9a7wu2r"}}'''
 
 secret = settings.STRIPE_WEBHOOK_SECRET
 
-generate_stripe_signature(payload=pyaload,secret=secret)
+generate_stripe_signature(payload=payload,secret=secret)
